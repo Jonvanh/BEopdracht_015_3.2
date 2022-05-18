@@ -4,9 +4,12 @@ __human_name__ = "files"
 
 # import statements
 
+from functools import cache
+from importlib.resources import path
 import os
 from posixpath import dirname
 import shutil
+from traceback import print_tb
 from zipfile import ZipFile
 from os import listdir
 from os.path import isfile, join
@@ -14,13 +17,18 @@ from pathlib import Path
 
 # 1
 
+Dir = "cache"
+cur_path = os.getcwd()
+Dir_full = os.path.join(cur_path, Dir)
+
 
 def clean_cache():
-    try:
-        return os.mkdir("cache")
-    except FileExistsError:
-        shutil.rmtree("cache")
-        return os.mkdir("cache")
+
+    if os.path.isdir(os.path.join(cur_path, Dir)):
+        shutil.rmtree(Dir_full)
+        return os.mkdir(Dir_full)
+    else:
+        return os.mkdir(Dir_full)
 
 
 # 2
@@ -36,10 +44,15 @@ def cache_zip(zip_file: str, cache_dir: str):
 
 
 def cached_files():
-    
-    only_files = [os.path.abspath(f) for f in os.listdir() if isfile(join(f))]
 
-    return only_files
+    # only_files = [os.path.abspath(f) for f in os.listdir(Dir_full) if not os.path.isdir(join(f))]
+    only_files2 = []
+    for f in os.listdir(Dir_full):
+        if f is not os.path.isdir:
+            f = os.path.abspath(f)
+            only_files2.append(f)
+
+    return only_files2
 
 
 print(cached_files())
@@ -55,8 +68,8 @@ def find_password(only_files: list):
             data = file.readlines()
             for lines in data:
                 if "password" in lines:
-                    return data
-    # print("no password found")
+                    return lines
+    return print("no password found")
 
 
 # find_password(result1)
